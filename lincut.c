@@ -6,9 +6,10 @@
 #include <unistd.h>
 
 
-#define Version "v0.1 (alpha)"
-#define ROOT "sudo "
+#define Version "lincut v0.2 (alpha)"
+//#define ROOT "sudo "
 #define copy "cp -r "
+#define list "dir "
 
 
 typedef enum {
@@ -17,8 +18,35 @@ typedef enum {
 } bool;
 
 
+int build_conf() {
+    char username[32]; // Declare a character buffer to store the username
+    getlogin_r(username, sizeof(username)); // Get the username using getlogin_r()
+    char path[1024];
+    strcpy(path, "/home/");
+    strcat(path, username);
+    strcat(path, "/.lincut");
+
+    char conf[1024];
+    strcpy(conf, path);
+    strcat(conf, "/plugins");
+    //conf
+    strcpy(conf, path);
+    strcat(conf, "/lincut.conf");
+
+    FILE* f = fopen(conf, "w");
+    if (f == NULL) {
+        printf("\nError building config! Seems that you can't access it. Is it at %s\n", conf);
+        return 1;
+    }
+    fprintf(f, "Version: %s", Version);
+    fclose(f);
+}
 
 
+int version() {
+    printf("Version: %s\n", Version);
+    return 0;
+}
 
 int init_lincut() {
     char username[32]; // Declare a character buffer to store the username
@@ -40,19 +68,26 @@ int init_lincut() {
         
 
     //conf
-    strcpy(conf, path);
-    strcat(conf, "/lincut.conf");
-    FILE* f = fopen(conf, "r");
-    if (f == NULL) {
-        FILE* f = fopen(conf, "w");
-        fprintf(f, "Version: %s", Version);
-        fclose(f);
-    }
-    else {
-        fclose(f);
-        printf("Already setup: %s\n", conf);
-    }
+    build_conf();
 
+}
+
+
+
+int pluglist() {
+    char username[32]; // Declare a character buffer to store the username
+    getlogin_r(username, sizeof(username)); // Get the username using getlogin_r()
+    char path[1024];
+    strcpy(path, "/home/");
+    strcat(path, username);
+    strcat(path, "/.lincut");
+    strcat(path, "/plugins/");
+
+    char cmd[2048];
+    strcpy(cmd, list);
+    strcat(cmd, path);
+
+    printf("\n[%s]: Done with code %i\n", Version, system(cmd));
 }
 
 
@@ -71,7 +106,7 @@ int addplugin(char* pn) {
     strcat(cmd, " ");
     strcat(cmd, path);
 
-    system(cmd);
+    printf("\n[%s]: Done with code %i\n", Version, system(cmd));
 }
 
 
@@ -82,11 +117,14 @@ int main(int ac, char** args) {
     }
 
     else if (strcmp(args[1], "help") == 0) {
-        printf("limcut %s\n\
+        printf("%s\n\
             Commands:\n\
                 \thelp\tDisplays this help menu.\n\
+                \tversion\tDisplays version.\n\
                 \tinit\tInitilizes limcut and makes config files.\n\
                 \tip\tInstall plugin, usage\"lincut ip <plugin to install>\"\n\
+                \tpl\tList plugins.\n\
+                \tconf\tBuild or rebuild (for updates), lincut configuration file.\n\
                 \t<none>\tRun plugin.\n\
             \
             \n\n\
@@ -105,8 +143,20 @@ int main(int ac, char** args) {
         addplugin(args[2]);
     }
 
+    else if (strcmp(args[1], "lp") == 0) {
+        pluglist();
+    }
+
+    else if (strcmp(args[1], "conf") == 0) {
+        build_conf();
+    }
+
     else if (strcmp(args[1], "init") == 0) {
         return init_lincut();
+    }
+
+    else if (strcmp(args[1], "version") == 0) {
+        return version();
     }
 
     else {
@@ -174,7 +224,7 @@ int main(int ac, char** args) {
         strcat(cmd, path);
         strcat(cmd, run);
 
-        system(cmd);
+        printf("\n[%s]: Done with code %i\n", Version, system(cmd));
     }
 
 
