@@ -1,0 +1,114 @@
+#!/bin/sh
+Version="lincut v0.3 (beta)"
+
+
+build_conf() {
+    conf="$HOME/.lincut/lincut.conf"
+    echo "Version: $Version" > conf 
+    if [ $? -ne 0 ]; then
+        echo "[$Version]: Error setting up: $conf\n"
+    fi
+}
+
+version() {
+    echo "[$Version]: Version: $Version"
+}
+
+init_lincut() {
+    path="$HOME/.lincut"
+    mkdir path > /dev/null
+    if [ $? -ne 0 ]; then
+        echo "[$Version]: Already setup: $path\n"
+    fi
+
+
+    plugins="$HOME/.lincut/plugins"
+    mkdir patpluginsh > /dev/null
+    if [ $? -ne 0 ]; then
+        echo "[$Version]: Already setup: $plugins\n"
+    fi
+    
+    build_conf
+}
+
+pluglist() {
+    ls "$HOME/.lincut/plugins/"
+    if [ $? -ne 0 ]; then
+        echo "[$Version]: Error listing plugins! Have you run \"lincut init\" or \"lincut conf\"?"
+    fi
+}
+
+addplugin() {
+    path="$HOME/.lincut/plugins/"
+
+    cp $1 $path
+
+    if [ $? -ne 0 ]; then
+        echo "[$Version]: Error installing plugin! Have you run \"lincut init\" or \"lincut conf\"?"
+    fi
+}
+
+
+
+if [ $# -lt 1 ]; then
+    echo "[$Version] Usage: lincut <cmd> <args>\n\tDo \"lincut help\" for help."
+    return 1
+
+elif [ "$1" = "help" ]; then
+    echo "$Version\n\
+            Commands:\n\
+                \thelp\tDisplays this help menu.\n\
+                \tversion\tDisplays version.\n\
+                \tinit\tInitilizes limcut and makes config files.\n\
+                \tip\tInstall plugin, usage\"lincut ip <plugin to install>\"\n\
+                \tpl\tList plugins.\n\
+                \tconf\tBuild or rebuild (for updates), lincut configuration file.\n\
+                \t<none>\tRun plugin."
+
+elif [ "$1" = "ip" ]; then
+    if [$# -lt 2]; then
+        echo "No input specified!"
+        return 2
+    fi
+    addplugin $2 
+
+elif [ "$1" = "lp" ]; then
+    pluglist
+
+elif [ "$1" = "conf" ]; then
+    build_conf
+
+elif [ "$1" = "init" ]; then
+    init_lincut
+    return $?
+
+elif [ "$1" = "version" ]; then
+    version
+    return $?
+
+else
+    conf="$HOME/.lincut/plugins/$1/plugin.conf"
+    
+    if [ ! -f "$conf" ]; then
+        echo "[$Version]: Bad plugin.conf @ $conf"
+        return 1
+    fi
+    
+    trim_leading_spaces() {
+        echo "$1" | sed 's/^[[:space:]]*//'
+    }
+    
+    run=$(grep 'run\s*=' "$conf" | sed 's/^.*=//')
+    run=$(trim_leading_spaces "$run")
+    runwith=$(grep 'runwith\s*=' "$conf" | sed 's/^.*=//')
+    runwith=$(trim_leading_spaces "$runwith")
+    
+    plugin="$HOME/.lincut/plugins/$1$run"
+
+    #get args
+    shift 1
+
+    eval "$runwith $plugin $@"
+
+fi
+     
