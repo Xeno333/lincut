@@ -1,5 +1,5 @@
 #!/bin/sh
-Version="lincut v0.3 (beta)"
+Version="lincut v0.4 (gamma)"
 
 
 build_conf() {
