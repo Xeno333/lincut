@@ -61,7 +61,7 @@ elif [ "$1" = "help" ]; then
                 \tversion\tDisplays version.\n\
                 \tinit\tInitilizes limcut and makes config files.\n\
                 \tip\tInstall plugin, usage\"lincut ip <plugin to install>\"\n\
-                \tpl\tList plugins.\n\
+                \tlp\tList plugins.\n\
                 \tconf\tBuild or rebuild (for updates), lincut configuration file.\n\
                 \t<none>\tRun plugin."
 
