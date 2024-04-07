@@ -1,10 +1,22 @@
 #!/bin/sh
-Version="lincut v0.4 (gamma)"
+Version="lincut v1.0 (gamma)"
+
+
+if [ -z $XDG_CONFIG_HOME]; then
+    if [ -d "$HOME/.config" ]; then
+        lincut_conf="$HOME/.config/lincut"
+    else 
+        mkdir "$HOME/.config" > /dev/null
+        lincut_conf="$HOME/.config/lincut"
+    fi
+else
+    lincut_conf="$XDG_CONFIG_HOME/lincut"
+fi
 
 
 build_conf() {
-    conf="$HOME/.lincut/lincut.conf"
-    echo "Version: $Version" > conf 
+    conf="$lincut_conf/lincut.conf"
+    echo "Version: $Version" > $conf 
     if [ $? -ne 0 ]; then
         echo "[$Version]: Error setting up: $conf\n"
     fi
@@ -15,15 +27,15 @@ version() {
 }
 
 init_lincut() {
-    path="$HOME/.lincut"
-    mkdir path > /dev/null
+    path="$lincut_conf"
+    mkdir $path 2> /dev/null
     if [ $? -ne 0 ]; then
         echo "[$Version]: Already setup: $path\n"
     fi
 
 
-    plugins="$HOME/.lincut/plugins"
-    mkdir patpluginsh > /dev/null
+    plugins="$lincut_conf/plugins"
+    mkdir $plugins 2> /dev/null
     if [ $? -ne 0 ]; then
         echo "[$Version]: Already setup: $plugins\n"
     fi
@@ -32,14 +44,14 @@ init_lincut() {
 }
 
 pluglist() {
-    ls "$HOME/.lincut/plugins/"
+    ls "$lincut_conf/plugins/"
     if [ $? -ne 0 ]; then
         echo "[$Version]: Error listing plugins! Have you run \"lincut init\" or \"lincut conf\"?"
     fi
 }
 
 addplugin() {
-    path="$HOME/.lincut/plugins/"
+    path="$lincut_conf/plugins/"
 
     cp $1 $path
 
@@ -55,7 +67,7 @@ if [ $# -lt 1 ]; then
     return 1
 
 elif [ "$1" = "help" ]; then
-    echo "$Version\n\
+    echo "[$Version]\n\
             Commands:\n\
                 \thelp\tDisplays this help menu.\n\
                 \tversion\tDisplays version.\n\
@@ -63,6 +75,7 @@ elif [ "$1" = "help" ]; then
                 \tip\tInstall plugin, usage\"lincut ip <plugin to install>\"\n\
                 \tlp\tList plugins.\n\
                 \tconf\tBuild or rebuild (for updates), lincut configuration file.\n\
+                \twc\tPrint location of configuration files.\n\
                 \t<none>\tRun plugin."
 
 elif [ "$1" = "ip" ]; then
@@ -74,6 +87,9 @@ elif [ "$1" = "ip" ]; then
 
 elif [ "$1" = "lp" ]; then
     pluglist
+
+elif [ "$1" = "wc" ]; then
+    echo "[$Version] Config files located at: $lincut_conf"
 
 elif [ "$1" = "conf" ]; then
     build_conf
@@ -87,7 +103,7 @@ elif [ "$1" = "version" ]; then
     return $?
 
 else
-    conf="$HOME/.lincut/plugins/$1/plugin.conf"
+    conf="$lincut_conf/plugins/$1/plugin.conf"
     
     if [ ! -f "$conf" ]; then
         echo "[$Version]: Bad plugin.conf @ $conf"
@@ -103,7 +119,7 @@ else
     runwith=$(grep 'runwith\s*=' "$conf" | sed 's/^.*=//')
     runwith=$(trim_leading_spaces "$runwith")
     
-    plugin="$HOME/.lincut/plugins/$1$run"
+    plugin="lincut_conf/plugins/$1$run"
 
     #get args
     shift 1
