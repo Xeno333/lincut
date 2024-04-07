@@ -119,7 +119,7 @@ else
     runwith=$(grep 'runwith\s*=' "$conf" | sed 's/^.*=//')
     runwith=$(trim_leading_spaces "$runwith")
     
-    plugin="lincut_conf/plugins/$1$run"
+    plugin="$lincut_conf/plugins/$1$run"
 
     #get args
     shift 1
