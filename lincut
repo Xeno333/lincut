@@ -2,13 +2,9 @@
 Version="lincut v1.0 (gamma)"
 
 
-if [ -z $XDG_CONFIG_HOME]; then
-    if [ -d "$HOME/.config" ]; then
-        lincut_conf="$HOME/.config/lincut"
-    else 
-        mkdir "$HOME/.config" > /dev/null
-        lincut_conf="$HOME/.config/lincut"
-    fi
+if [ -z "$XDG_CONFIG_HOME" ]; then
+   lincut_conf="$HOME/.config/lincut"
+   mkdir -p "$lincut_conf"
 else
     lincut_conf="$XDG_CONFIG_HOME/lincut"
 fi
@@ -16,9 +12,8 @@ fi
 
 build_conf() {
     conf="$lincut_conf/lincut.conf"
-    echo "Version: $Version" > $conf 
-    if [ $? -ne 0 ]; then
-        echo "[$Version]: Error setting up: $conf\n"
+    if ! echo "Version: " > "$conf"; then
+        echo "[$Version]: Error setting up: $conf"
     fi
 }
 
@@ -28,34 +23,28 @@ version() {
 
 init_lincut() {
     path="$lincut_conf"
-    mkdir $path 2> /dev/null
-    if [ $? -ne 0 ]; then
-        echo "[$Version]: Already setup: $path\n"
+    if ! mkdir "$path" 2> /dev/null; then
+        echo "[$Version]: Already setup: $path"
     fi
 
 
     plugins="$lincut_conf/plugins"
-    mkdir $plugins 2> /dev/null
-    if [ $? -ne 0 ]; then
-        echo "[$Version]: Already setup: $plugins\n"
+    if ! mkdir "$plugins" 2> /dev/null; then
+        echo "[$Version]: Already setup: $plugins"
     fi
     
     build_conf
 }
 
 pluglist() {
-    ls "$lincut_conf/plugins/"
-    if [ $? -ne 0 ]; then
+    if ! ls "$lincut_conf/plugins/"; then
         echo "[$Version]: Error listing plugins! Have you run \"lincut init\" or \"lincut conf\"?"
     fi
 }
 
 addplugin() {
     path="$lincut_conf/plugins/"
-
-    cp $1 $path
-
-    if [ $? -ne 0 ]; then
+    if ! cp "$1" "$path"; then
         echo "[$Version]: Error installing plugin! Have you run \"lincut init\" or \"lincut conf\"?"
     fi
 }
@@ -63,11 +52,11 @@ addplugin() {
 
 
 if [ $# -lt 1 ]; then
-    echo "[$Version] Usage: lincut <cmd> <args>\n\tDo \"lincut help\" for help."
+    printf "[%s] Usage: lincut <cmd> <args>\n\tDo \"lincut help\" for help.\n" "$Version"
     return 1
 
 elif [ "$1" = "help" ]; then
-    echo "[$Version]\n\
+    printf "[%s]\n\
             Commands:\n\
                 \thelp\tDisplays this help menu.\n\
                 \tversion\tDisplays version.\n\
@@ -76,14 +65,15 @@ elif [ "$1" = "help" ]; then
                 \tlp\tList plugins.\n\
                 \tconf\tBuild or rebuild (for updates), lincut configuration file.\n\
                 \twc\tPrint location of configuration files.\n\
-                \t<none>\tRun plugin."
+                \t<none>\tRun plugin.\n"\
+                "$Version"
 
 elif [ "$1" = "ip" ]; then
-    if [$# -lt 2]; then
+    if [ $# -lt 2 ]; then
         echo "No input specified!"
         return 2
     fi
-    addplugin $2 
+    addplugin "$2"
 
 elif [ "$1" = "lp" ]; then
     pluglist
@@ -124,7 +114,7 @@ else
     #get args
     shift 1
 
-    eval "$runwith $plugin $@"
+    eval "$runwith $plugin $*"
 
 fi
      
