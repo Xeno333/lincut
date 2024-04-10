@@ -44,7 +44,7 @@ pluglist() {
 
 addplugin() {
     path="$lincut_conf/plugins/"
-    if ! cp "$1" "$path"; then
+    if ! cp -r "$1" "$path"; then
         echo "[$Version]: Error installing plugin! Have you run \"lincut init\" or \"lincut conf\"?"
     fi
 }
